@@ -9,7 +9,8 @@
 import UIKit
 
 class PhotoBrowserCollectionViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
-  var photos = NSMutableOrderedSet()
+    
+  var photos = Set<PhotoInfo>()
   
   let refreshControl = UIRefreshControl()
   
@@ -45,7 +46,7 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
   }
   
   override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-    performSegueWithIdentifier("ShowPhoto", sender: (self.photos.objectAtIndex(indexPath.item) as! PhotoInfo).id)
+    performSegueWithIdentifier("ShowPhoto", sender: self.photos[self.photos.startIndex.advancedBy(indexPath.item)].id)
   }
   
   // MARK: Helper
