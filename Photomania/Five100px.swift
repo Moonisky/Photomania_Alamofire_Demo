@@ -7,8 +7,71 @@
 //
 
 import UIKit
+import Alamofire
+
+enum BackendError: Error {
+  case network(error: Error)
+  case dataSerialization(error: Error)
+  case imageSerialization(error: String)
+}
+
+extension DataRequest {
+  static func imageResponseSerializer() -> DataResponseSerializer<UIImage> {
+    return DataResponseSerializer { request, response, data, error in
+      guard error == nil else { return .failure(BackendError.network(error: error!)) }
+
+      let result = Request.serializeResponseData(response: response, data: data, error: nil)
+      
+      guard case let .success(validData) = result else {
+        return .failure(BackendError.dataSerialization(error: result.error as! AFError))
+      }
+      
+      guard let image = UIImage(data: validData, scale: UIScreen.main.scale) else {
+        return .failure(BackendError.imageSerialization(error: "数据无法被序列化，因为接收到的数据为空"))
+      }
+      
+      return .success(image)
+    }
+  }
+  
+  @discardableResult
+  func responseImage(queue: DispatchQueue? = nil, completionHandler: @escaping (DataResponse<UIImage>) -> Void) -> Self {
+    return response(queue: queue, responseSerializer: DataRequest.imageResponseSerializer(), completionHandler: completionHandler)
+  }
+}
 
 struct Five100px {
+  
+  enum Router: URLRequestConvertible {
+    static let baseURLString = "https://api.500px.com/v1"
+    static let consumerKey = "HVhSQ8stAClpTASwePsvjFurYn1P3wo7XMPLyWPt"
+    
+    case popularPhotos(Int)
+    case photoInfo(Int, ImageSize)
+    case comments(Int, Int)
+    
+    func asURLRequest() throws -> URLRequest {
+      let result: (path: String, parameters: Parameters) = {
+        switch self {
+        case .popularPhotos(let page):
+          let params = ["consumer_key": Router.consumerKey, "page": "\(page)", "feature": "popular", "rpp": "50",  "include_store": "store_download", "include_states": "votes"]
+          return ("/photos", params)
+        case .photoInfo(let photoID, let imageSize):
+          let params = ["consumer_key": Router.consumerKey, "image_size": "\(imageSize.rawValue)"]
+          return ("/photos/\(photoID)", params)
+        case .comments(let photoID, let commentsPage):
+          let params = ["consumer_key": Router.consumerKey, "comments": "1", "comments_page": "\(commentsPage)"]
+          return ("/photos/\(photoID)/comments", params)
+        }
+      }()
+      
+      let url = try Router.baseURLString.asURL()
+      let urlRequest = URLRequest(url: url.appendingPathComponent(result.path))
+      
+      return try URLEncoding.default.encode(urlRequest, with: result.parameters)
+    }
+  }
+  
   enum ImageSize: Int {
     case tiny = 1
     case small = 2

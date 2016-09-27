@@ -14,6 +14,8 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
   var photos = Set<PhotoInfo>()
   
   private let refreshControl = UIRefreshControl()
+  private var populatingPhotos = false
+  private var currentPage = 1
   
   private let PhotoBrowserCellIdentifier = "PhotoBrowserCell"
   private let PhotoBrowserFooterViewIdentifier = "PhotoBrowserFooterView"
@@ -25,21 +27,7 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
     
     setupView()
     
-    Alamofire.request("https://api.500px.com/v1/photos", method: .get, parameters: ["consumer_key": "HVhSQ8stAClpTASwePsvjFurYn1P3wo7XMPLyWPt"]).responseJSON {
-      response in
-      guard let JSON = response.result.value else { return }
-      guard let photoJsons = (JSON as AnyObject).value(forKey: "photos") as? [NSDictionary] else { return }
-      
-      photoJsons.forEach {
-        guard let nsfw = $0["nsfw"] as? Bool,
-          let id = $0["id"] as? Int,
-          let url = $0["image_url"] as? String,
-          nsfw == false else { return }
-        self.photos.insert(PhotoInfo(id: id, url: url))
-      }
-      
-      self.collectionView?.reloadData()
-    }
+    populatePhotos()
   }
   
   override func didReceiveMemoryWarning() {
@@ -55,12 +43,13 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
   override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
     guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PhotoBrowserCellIdentifier, for: indexPath) as? PhotoBrowserCollectionViewCell else { return UICollectionViewCell() }
     
-    let photoInfo = photos[photos.index(photos.startIndex, offsetBy: indexPath.item)]
+    let imageURL = photos[photos.index(photos.startIndex, offsetBy: indexPath.item)].url
+    cell.imageView.image = nil
+    cell.request?.cancel()
     
-    Alamofire.request(photoInfo.url, method: .get).response {
-      dataResponse in
-      guard let data = dataResponse.data else { return }
-      let image = UIImage(data: data)
+    cell.request = Alamofire.request(imageURL, method: .get).responseImage {
+      response in
+      guard let image = response.result.value, response.result.error == nil else { return }
       cell.imageView.image = image
     }
     
@@ -111,6 +100,51 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
     }
   }
   
+  // MARK: ScrollView Delegate
+  override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    if scrollView.contentOffset.y + view.frame.height > scrollView.contentSize.height * 0.8 {
+      populatePhotos()
+    }
+  }
+  
+  private func populatePhotos() {
+    if populatingPhotos { return }
+    
+    populatingPhotos = true
+    
+    Alamofire.request(Five100px.Router.popularPhotos(currentPage)).responseJSON {
+      response in
+      guard let JSON = response.result.value, response.result.error == nil else {
+        self.populatingPhotos = false
+        return
+      }
+      
+      DispatchQueue.global(qos: .userInitiated).async {
+        guard let photoJsons = (JSON as AnyObject).value(forKey: "photos") as? [[String: Any]] else { return }
+        
+        let lastItemCount = self.photos.count
+        
+        photoJsons.forEach {
+          guard let nsfw = $0["nsfw"] as? Bool,
+            let id = $0["id"] as? Int,
+            let url = $0["image_url"] as? String,
+            nsfw == false else { return }
+          self.photos.insert(PhotoInfo(id: id, url: url))
+        }
+        
+        let indexPaths = (lastItemCount..<self.photos.count).map { IndexPath(item: $0, section: 0) }
+        
+        DispatchQueue.main.async {
+          self.collectionView?.insertItems(at: indexPaths)
+        }
+        
+        self.currentPage += 1
+      }
+      
+      self.populatingPhotos = false
+    }
+  }
+  
   private dynamic func handleRefresh() {
     
   }
@@ -118,6 +152,7 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
 
 fileprivate class PhotoBrowserCollectionViewCell: UICollectionViewCell {
   fileprivate let imageView = UIImageView()
+  fileprivate var request: Request?
   
   required init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
