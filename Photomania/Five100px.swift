@@ -89,7 +89,8 @@ struct PhotoInfo {
     self.url = url
   }
   
-  init?(response: HTTPURLResponse, representation: AnyObject) {
+  init?(response: HTTPURLResponse, representation: Any) {
+    let representation = representation as AnyObject
     guard let photoID = representation.value(forKeyPath: "photo.id") as? Int,
       let photoURL = representation.value(forKeyPath: "photo.image_url") as? String else { return nil }
     id = photoID
