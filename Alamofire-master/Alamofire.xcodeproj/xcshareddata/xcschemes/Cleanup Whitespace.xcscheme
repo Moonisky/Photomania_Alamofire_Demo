@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "22F2B00A19A5C39900939296"
-               BuildableName = "Photomania.app"
-               BlueprintName = "Photomania"
-               ReferencedContainer = "container:Photomania.xcodeproj">
+               BlueprintIdentifier = "4CCB207C1D45563900C64D5B"
+               BuildableName = "Cleanup Whitespace"
+               BlueprintName = "Cleanup Whitespace"
+               ReferencedContainer = "container:Alamofire.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -28,26 +28,7 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "22F2B01C19A5C39A00939296"
-               BuildableName = "PhotomaniaTests.xctest"
-               BlueprintName = "PhotomaniaTests"
-               ReferencedContainer = "container:Photomania.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "22F2B00A19A5C39900939296"
-            BuildableName = "Photomania.app"
-            BlueprintName = "Photomania"
-            ReferencedContainer = "container:Photomania.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </TestAction>
@@ -61,23 +42,15 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "22F2B00A19A5C39900939296"
-            BuildableName = "Photomania.app"
-            BlueprintName = "Photomania"
-            ReferencedContainer = "container:Photomania.xcodeproj">
+            BlueprintIdentifier = "4CCB207C1D45563900C64D5B"
+            BuildableName = "Cleanup Whitespace"
+            BlueprintName = "Cleanup Whitespace"
+            ReferencedContainer = "container:Alamofire.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "OS_ACTIVITY_MODE"
-            value = "disable"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -87,16 +60,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "22F2B00A19A5C39900939296"
-            BuildableName = "Photomania.app"
-            BlueprintName = "Photomania"
-            ReferencedContainer = "container:Photomania.xcodeproj">
+            BlueprintIdentifier = "4CCB207C1D45563900C64D5B"
+            BuildableName = "Cleanup Whitespace"
+            BlueprintName = "Cleanup Whitespace"
+            ReferencedContainer = "container:Alamofire.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

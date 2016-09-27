@@ -172,8 +172,13 @@ class PhotoViewerViewController: UIViewController {
   // MARK: Download Photo
   
   private dynamic func showActions() {
-    let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: "Cancel", destructiveButtonTitle: nil, otherButtonTitles: "Download Photo")
-    actionSheet.show(from: navigationController!.toolbar)
+    let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+    actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+    actionSheet.addAction(UIAlertAction(title: "Download Photo", style: .default, handler: {
+      action in
+        self.downloadPhoto()
+    }))
+    present(actionSheet, animated: true, completion: nil)
   }
   
   fileprivate func downloadPhoto() {
@@ -190,7 +195,6 @@ class PhotoViewerViewController: UIViewController {
     let hidden = navigationController?.navigationBar.isHidden ?? false
     navigationController?.setNavigationBarHidden(!hidden, animated: true)
     navigationController?.setToolbarHidden(!hidden, animated: true)
-    UIApplication.shared.setStatusBarHidden(!hidden, with: .slide)
   }
   
   private func zoomInZoomOut(_ point: CGPoint!) {
@@ -206,6 +210,10 @@ class PhotoViewerViewController: UIViewController {
     let rectToZoom = CGRect(x: x, y: y, width: width, height: height)
     
     self.scrollView.zoom(to: rectToZoom, animated: true)
+  }
+  
+  override var prefersStatusBarHidden: Bool {
+    return !(navigationController?.navigationBar.isHidden ?? false)
   }
 }
 
@@ -256,14 +264,6 @@ extension PhotoViewerViewController: UIScrollViewDelegate {
     return imageView
   }
   
-}
-
-extension PhotoViewerViewController: UIActionSheetDelegate {
-  func actionSheet(_ actionSheet: UIActionSheet, clickedButtonAt buttonIndex: Int) {
-    if buttonIndex == 1 {
-      downloadPhoto()
-    }
-  }
 }
 
 extension PhotoViewerViewController: UIPopoverPresentationControllerDelegate {

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Alamofire
 
 class PhotoBrowserCollectionViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
   
@@ -23,6 +24,22 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
     super.viewDidLoad()
     
     setupView()
+    
+    Alamofire.request("https://api.500px.com/v1/photos", method: .get, parameters: ["consumer_key": "HVhSQ8stAClpTASwePsvjFurYn1P3wo7XMPLyWPt"]).responseJSON {
+      response in
+      guard let JSON = response.result.value else { return }
+      guard let photoJsons = (JSON as AnyObject).value(forKey: "photos") as? [NSDictionary] else { return }
+      
+      photoJsons.forEach {
+        guard let nsfw = $0["nsfw"] as? Bool,
+          let id = $0["id"] as? Int,
+          let url = $0["image_url"] as? String,
+          nsfw == false else { return }
+        self.photos.insert(PhotoInfo(id: id, url: url))
+      }
+      
+      self.collectionView?.reloadData()
+    }
   }
   
   override func didReceiveMemoryWarning() {
@@ -37,6 +54,15 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
   
   override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
     guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PhotoBrowserCellIdentifier, for: indexPath) as? PhotoBrowserCollectionViewCell else { return UICollectionViewCell() }
+    
+    let photoInfo = photos[photos.index(photos.startIndex, offsetBy: indexPath.item)]
+    
+    Alamofire.request(photoInfo.url, method: .get).response {
+      dataResponse in
+      guard let data = dataResponse.data else { return }
+      let image = UIImage(data: data)
+      cell.imageView.image = image
+    }
     
     return cell
   }

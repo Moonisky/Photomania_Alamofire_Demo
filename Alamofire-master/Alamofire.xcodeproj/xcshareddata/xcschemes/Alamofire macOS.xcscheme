@@ -14,10 +14,24 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "22F2B00A19A5C39900939296"
-               BuildableName = "Photomania.app"
-               BlueprintName = "Photomania"
-               ReferencedContainer = "container:Photomania.xcodeproj">
+               BlueprintIdentifier = "4DD67C0A1A5C55C900ED2280"
+               BuildableName = "Alamofire.framework"
+               BlueprintName = "Alamofire macOS"
+               ReferencedContainer = "container:Alamofire.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "F829C6B11A7A94F100A2CD59"
+               BuildableName = "Alamofire macOS Tests.xctest"
+               BlueprintName = "Alamofire macOS Tests"
+               ReferencedContainer = "container:Alamofire.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,20 +46,20 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "22F2B01C19A5C39A00939296"
-               BuildableName = "PhotomaniaTests.xctest"
-               BlueprintName = "PhotomaniaTests"
-               ReferencedContainer = "container:Photomania.xcodeproj">
+               BlueprintIdentifier = "F829C6B11A7A94F100A2CD59"
+               BuildableName = "Alamofire macOS Tests.xctest"
+               BlueprintName = "Alamofire macOS Tests"
+               ReferencedContainer = "container:Alamofire.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "22F2B00A19A5C39900939296"
-            BuildableName = "Photomania.app"
-            BlueprintName = "Photomania"
-            ReferencedContainer = "container:Photomania.xcodeproj">
+            BlueprintIdentifier = "4DD67C0A1A5C55C900ED2280"
+            BuildableName = "Alamofire.framework"
+            BlueprintName = "Alamofire macOS"
+            ReferencedContainer = "container:Alamofire.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -61,23 +75,15 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "22F2B00A19A5C39900939296"
-            BuildableName = "Photomania.app"
-            BlueprintName = "Photomania"
-            ReferencedContainer = "container:Photomania.xcodeproj">
+            BlueprintIdentifier = "4DD67C0A1A5C55C900ED2280"
+            BuildableName = "Alamofire.framework"
+            BlueprintName = "Alamofire macOS"
+            ReferencedContainer = "container:Alamofire.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "OS_ACTIVITY_MODE"
-            value = "disable"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -87,16 +93,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "22F2B00A19A5C39900939296"
-            BuildableName = "Photomania.app"
-            BlueprintName = "Photomania"
-            ReferencedContainer = "container:Photomania.xcodeproj">
+            BlueprintIdentifier = "4DD67C0A1A5C55C900ED2280"
+            BuildableName = "Alamofire.framework"
+            BlueprintName = "Alamofire macOS"
+            ReferencedContainer = "container:Alamofire.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
