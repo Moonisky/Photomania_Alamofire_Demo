@@ -9,12 +9,33 @@
 import UIKit
 import QuartzCore
 
-class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopoverPresentationControllerDelegate, UIActionSheetDelegate {
-  var photoID: Int = 0
+fileprivate func < <T: Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+fileprivate func > <T: Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l > r
+  default:
+    return rhs < lhs
+  }
+}
+
+
+class PhotoViewerViewController: UIViewController {
+  var photoID = 0
   
-  let scrollView = UIScrollView()
-  let imageView = UIImageView()
-  let spinner = UIActivityIndicatorView(activityIndicatorStyle: .WhiteLarge)
+  fileprivate let scrollView = UIScrollView()
+  fileprivate let imageView = UIImageView()
+  fileprivate let spinner = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
   
   var photoInfo: PhotoInfo?
   
@@ -41,22 +62,22 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
     scrollView.zoomScale = 1.0
     view.addSubview(scrollView)
     
-    imageView.contentMode = .ScaleAspectFill
+    imageView.contentMode = .scaleAspectFill
     scrollView.addSubview(imageView)
     
-    let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: "handleDoubleTap:")
+    let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap(_:)))
     doubleTapRecognizer.numberOfTapsRequired = 2
     doubleTapRecognizer.numberOfTouchesRequired = 1
     scrollView.addGestureRecognizer(doubleTapRecognizer)
     
-    let singleTapRecognizer = UITapGestureRecognizer(target: self, action: "handleSingleTap:")
+    let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleSingleTap(_:)))
     singleTapRecognizer.numberOfTapsRequired = 1
     singleTapRecognizer.numberOfTouchesRequired = 1
-    singleTapRecognizer.requireGestureRecognizerToFail(doubleTapRecognizer)
+    singleTapRecognizer.require(toFail: doubleTapRecognizer)
     scrollView.addGestureRecognizer(singleTapRecognizer)
   }
   
-  override func viewWillAppear(animated: Bool) {
+  override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     
     if photoInfo != nil {
@@ -64,26 +85,26 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
     }
   }
   
-  override func viewWillDisappear(animated: Bool) {
+  override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
     navigationController?.setToolbarHidden(true, animated: true)
   }
   
   // MARK: Bottom Bar
   
-  func addButtomBar() {
+  private func addButtomBar() {
     var items = [UIBarButtonItem]()
     
-    let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
+    let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
     
-    items.append(barButtonItemWithImageNamed("hamburger", title: nil, action: "showDetails"))
+    items.append(barButtonItemWithImageNamed("hamburger", title: nil, action: #selector(showDetails)))
     
     if photoInfo?.commentsCount > 0 {
-      items.append(barButtonItemWithImageNamed("bubble", title: "\(photoInfo?.commentsCount ?? 0)", action: "showComments"))
+      items.append(barButtonItemWithImageNamed("bubble", title: "\(photoInfo?.commentsCount ?? 0)", action: #selector(showComments)))
     }
     
     items.append(flexibleSpace)
-    items.append(UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Action, target: self, action: "showActions"))
+    items.append(UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.action, target: self, action: #selector(showActions)))
     items.append(flexibleSpace)
     
     items.append(barButtonItemWithImageNamed("like", title: "\(photoInfo?.votesCount ?? 0)"))
@@ -95,7 +116,7 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
     navigationItem.rightBarButtonItem = UIBarButtonItem(customView: userInfoViewForPhotoInfo(photoInfo!))
   }
   
-  func userInfoViewForPhotoInfo(photoInfo: PhotoInfo) -> UIView {
+  private func userInfoViewForPhotoInfo(_ photoInfo: PhotoInfo) -> UIView {
     let userProfileImageView = UIImageView(frame: CGRect(x: 0, y: 10.0, width: 30.0, height: 30.0))
     userProfileImageView.layer.cornerRadius = 3.0
     userProfileImageView.layer.masksToBounds = true
@@ -103,46 +124,36 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
     return userProfileImageView
   }
 
-  func showDetails() {
-    let photoDetailsViewController = storyboard?.instantiateViewControllerWithIdentifier("PhotoDetails") as? PhotoDetailsViewController
-    photoDetailsViewController?.modalPresentationStyle = .OverCurrentContext
-    photoDetailsViewController?.modalTransitionStyle = .CoverVertical
-    photoDetailsViewController?.photoInfo = photoInfo
+  private dynamic func showDetails() {
+    guard let photoDetailsViewController = storyboard?.instantiateViewController(withIdentifier: "PhotoDetails") as? PhotoDetailsViewController else { return }
+    photoDetailsViewController.modalPresentationStyle = .overCurrentContext
+    photoDetailsViewController.modalTransitionStyle = .coverVertical
+    photoDetailsViewController.photoInfo = photoInfo
     
-    presentViewController(photoDetailsViewController!, animated: true, completion: nil)
+    present(photoDetailsViewController, animated: true, completion: nil)
   }
   
-  func showComments() {
-    let photoCommentsViewController = storyboard?.instantiateViewControllerWithIdentifier("PhotoComments") as? PhotoCommentsViewController
-    photoCommentsViewController?.modalPresentationStyle = .Popover
-    photoCommentsViewController?.modalTransitionStyle = .CoverVertical
-    photoCommentsViewController?.photoID = photoID
-    photoCommentsViewController?.popoverPresentationController?.delegate = self
-    presentViewController(photoCommentsViewController!, animated: true, completion: nil)
+  private dynamic func showComments() {
+    guard let photoCommentsViewController = storyboard?.instantiateViewController(withIdentifier: "PhotoComments") as? PhotoCommentsViewController else { return }
+    photoCommentsViewController.modalPresentationStyle = .popover
+    photoCommentsViewController.modalTransitionStyle = .coverVertical
+    photoCommentsViewController.photoID = photoID
+    photoCommentsViewController.popoverPresentationController?.delegate = self
+    present(photoCommentsViewController, animated: true, completion: nil)
   }
   
-  func adaptivePresentationStyleForPresentationController(controller: UIPresentationController) -> UIModalPresentationStyle {
-    return UIModalPresentationStyle.OverCurrentContext
-  }
-  
-  func presentationController(controller: UIPresentationController, viewControllerForAdaptivePresentationStyle style: UIModalPresentationStyle) -> UIViewController? {
-    let navController = UINavigationController(rootViewController: controller.presentedViewController)
-    
-    return navController
-  }
-  
-  func barButtonItemWithImageNamed(imageName: String?, title: String?, action: Selector? = nil) -> UIBarButtonItem {
-    let button = UIButton(type: .Custom)
+  private func barButtonItemWithImageNamed(_ imageName: String?, title: String?, action: Selector? = nil) -> UIBarButtonItem {
+    let button = UIButton(type: .custom)
     
     if let imageName = imageName {
-        button.setImage(UIImage(named: imageName)!.imageWithRenderingMode(.AlwaysTemplate), forState: .Normal)
+        button.setImage(UIImage(named: imageName)!.withRenderingMode(.alwaysTemplate), for: UIControlState())
     }
     
     if let title = title {
-        button.setTitle(title, forState: .Normal)
+        button.setTitle(title, for: UIControlState())
         button.titleEdgeInsets = UIEdgeInsets(top: 0.0, left: 10.0, bottom: 0.0, right: 0.0)
         
-        let font = UIFont.preferredFontForTextStyle(UIFontTextStyleFootnote)
+        let font = UIFont.preferredFont(forTextStyle: .footnote)
         button.titleLabel?.font = font
     }
     
@@ -150,7 +161,7 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
     button.frame.size = CGSize(width: min(size.width + 10.0, 60), height: size.height)
     
     if let action = action {
-        button.addTarget(self, action: action, forControlEvents: .TouchUpInside)
+        button.addTarget(self, action: action, for: .touchUpInside)
     }
     
     let barButton = UIBarButtonItem(customView: button)
@@ -160,83 +171,32 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
   
   // MARK: Download Photo
   
-  func showActions() {
+  private dynamic func showActions() {
     let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: "Cancel", destructiveButtonTitle: nil, otherButtonTitles: "Download Photo")
-    actionSheet.showFromToolbar(navigationController!.toolbar)
+    actionSheet.show(from: navigationController!.toolbar)
   }
   
-  func actionSheet(actionSheet: UIActionSheet, clickedButtonAtIndex buttonIndex: Int) {
-    if buttonIndex == 1 {
-      downloadPhoto()
-    }
-  }
-  
-  func downloadPhoto() {
+  fileprivate func downloadPhoto() {
   }
   
   // MARK: Gesture Recognizers
   
-  func handleDoubleTap(recognizer: UITapGestureRecognizer!) {
-    let pointInView = recognizer.locationInView(self.imageView)
-    self.zoomInZoomOut(pointInView)
+  private dynamic func handleDoubleTap(_ recognizer: UITapGestureRecognizer!) {
+    let pointInView = recognizer.location(in: imageView)
+    zoomInZoomOut(pointInView)
   }
   
-  func handleSingleTap(recognizer: UITapGestureRecognizer!) {
-    let hidden = navigationController?.navigationBar.hidden ?? false
+  private dynamic func handleSingleTap(_ recognizer: UITapGestureRecognizer!) {
+    let hidden = navigationController?.navigationBar.isHidden ?? false
     navigationController?.setNavigationBarHidden(!hidden, animated: true)
     navigationController?.setToolbarHidden(!hidden, animated: true)
-    UIApplication.sharedApplication().setStatusBarHidden(!hidden, withAnimation: .Slide)
+    UIApplication.shared.setStatusBarHidden(!hidden, with: .slide)
   }
   
-  // MARK: ScrollView
-  
-  func centerFrameFromImage(image: UIImage?) -> CGRect {
+  private func zoomInZoomOut(_ point: CGPoint!) {
+    let newZoomScale = scrollView.zoomScale > (scrollView.maximumZoomScale/2) ? scrollView.minimumZoomScale : scrollView.maximumZoomScale
     
-    guard let image = image else { return CGRectZero }
-    
-    let scaleFactor = scrollView.frame.size.width / image.size.width
-    let newHeight = image.size.height * scaleFactor
-    
-    var newImageSize = CGSize(width: scrollView.frame.size.width, height: newHeight)
-    
-    newImageSize.height = min(scrollView.frame.size.height, newImageSize.height)
-    
-    let centerFrame = CGRect(x: 0.0, y: scrollView.frame.size.height/2 - newImageSize.height/2, width: newImageSize.width, height: newImageSize.height)
-    
-    return centerFrame
-  }
-  
-  func scrollViewDidZoom(scrollView: UIScrollView) {
-    self.centerScrollViewContents()
-  }
-  
-  func centerScrollViewContents() {
-    let boundsSize = scrollView.frame
-    var contentsFrame = self.imageView.frame
-    
-    if contentsFrame.size.width < boundsSize.width {
-      contentsFrame.origin.x = (boundsSize.width - contentsFrame.size.width) / 2.0
-    } else {
-      contentsFrame.origin.x = 0.0
-    }
-    
-    if contentsFrame.size.height < boundsSize.height {
-      contentsFrame.origin.y = (boundsSize.height - scrollView.scrollIndicatorInsets.top - scrollView.scrollIndicatorInsets.bottom - contentsFrame.size.height) / 2.0
-    } else {
-      contentsFrame.origin.y = 0.0
-    }
-    
-    self.imageView.frame = contentsFrame
-  }
-  
-  func viewForZoomingInScrollView(scrollView: UIScrollView) -> UIView? {
-    return self.imageView
-  }
-  
-  func zoomInZoomOut(point: CGPoint!) {
-    let newZoomScale = self.scrollView.zoomScale > (self.scrollView.maximumZoomScale/2) ? self.scrollView.minimumZoomScale : self.scrollView.maximumZoomScale
-    
-    let scrollViewSize = self.scrollView.bounds.size
+    let scrollViewSize = scrollView.bounds.size
     
     let width = scrollViewSize.width / newZoomScale
     let height = scrollViewSize.height / newZoomScale
@@ -245,6 +205,75 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
     
     let rectToZoom = CGRect(x: x, y: y, width: width, height: height)
     
-    self.scrollView.zoomToRect(rectToZoom, animated: true)
+    self.scrollView.zoom(to: rectToZoom, animated: true)
+  }
+}
+
+// MARK: ScrollView
+
+extension PhotoViewerViewController: UIScrollViewDelegate {
+  
+  private func centerFrameFromImage(_ image: UIImage?) -> CGRect {
+    
+    guard let image = image else { return CGRect() }
+    
+    let scaleFactor = scrollView.frame.width / image.size.width
+    let newHeight = image.size.height * scaleFactor
+    
+    var newImageSize = CGSize(width: scrollView.frame.width, height: newHeight)
+    
+    newImageSize.height = min(scrollView.frame.height, newImageSize.height)
+    
+    let centerFrame = CGRect(x: 0.0, y: scrollView.frame.height/2 - newImageSize.height/2, width: newImageSize.width, height: newImageSize.height)
+    
+    return centerFrame
+  }
+  
+  func scrollViewDidZoom(_ scrollView: UIScrollView) {
+    centerScrollViewContents()
+  }
+  
+  private func centerScrollViewContents() {
+    let boundsSize = scrollView.frame
+    var contentsFrame = imageView.frame
+    
+    if contentsFrame.width < boundsSize.width {
+      contentsFrame.origin.x = (boundsSize.width - contentsFrame.width) / 2.0
+    } else {
+      contentsFrame.origin.x = 0.0
+    }
+    
+    if contentsFrame.height < boundsSize.height {
+      contentsFrame.origin.y = (boundsSize.height - scrollView.scrollIndicatorInsets.top - scrollView.scrollIndicatorInsets.bottom - contentsFrame.height) / 2.0
+    } else {
+      contentsFrame.origin.y = 0.0
+    }
+    
+    self.imageView.frame = contentsFrame
+  }
+  
+  func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+    return imageView
+  }
+  
+}
+
+extension PhotoViewerViewController: UIActionSheetDelegate {
+  func actionSheet(_ actionSheet: UIActionSheet, clickedButtonAt buttonIndex: Int) {
+    if buttonIndex == 1 {
+      downloadPhoto()
+    }
+  }
+}
+
+extension PhotoViewerViewController: UIPopoverPresentationControllerDelegate {
+  func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+    return UIModalPresentationStyle.overCurrentContext
+  }
+  
+  func presentationController(_ controller: UIPresentationController, viewControllerForAdaptivePresentationStyle style: UIModalPresentationStyle) -> UIViewController? {
+    let navController = UINavigationController(rootViewController: controller.presentedViewController)
+    
+    return navController
   }
 }

@@ -9,32 +9,31 @@
 import UIKit
 
 class PhotoDetailsViewController: UIViewController {
-  @IBOutlet weak var highestLabel: UILabel!
-  @IBOutlet weak var pulseLabel: UILabel!
-  @IBOutlet weak var viewsLabel: UILabel!
-  @IBOutlet weak var cameraLabel: UILabel!
-  @IBOutlet weak var focalLengthLabel: UILabel!
-  @IBOutlet weak var shutterSpeedLabel: UILabel!
-  @IBOutlet weak var apertureLabel: UILabel!
-  @IBOutlet weak var isoLabel: UILabel!
-  @IBOutlet weak var categoryLabel: UILabel!
-  @IBOutlet weak var takenLabel: UILabel!
-  @IBOutlet weak var uploadedLabel: UILabel!
-  @IBOutlet weak var descriptionLabel: UILabel!
-  
+  @IBOutlet fileprivate weak var highestLabel: UILabel!
+  @IBOutlet fileprivate weak var pulseLabel: UILabel!
+  @IBOutlet fileprivate weak var viewsLabel: UILabel!
+  @IBOutlet fileprivate weak var cameraLabel: UILabel!
+  @IBOutlet fileprivate weak var focalLengthLabel: UILabel!
+  @IBOutlet fileprivate weak var shutterSpeedLabel: UILabel!
+  @IBOutlet fileprivate weak var apertureLabel: UILabel!
+  @IBOutlet fileprivate weak var isoLabel: UILabel!
+  @IBOutlet fileprivate weak var categoryLabel: UILabel!
+  @IBOutlet fileprivate weak var takenLabel: UILabel!
+  @IBOutlet fileprivate weak var uploadedLabel: UILabel!
+  @IBOutlet fileprivate weak var descriptionLabel: UILabel!
   
   var photoInfo: PhotoInfo?
   
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    let tapGesture = UITapGestureRecognizer(target: self, action: "dismiss")
+    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissController))
     tapGesture.numberOfTapsRequired = 1
     tapGesture.numberOfTouchesRequired = 1
     view.addGestureRecognizer(tapGesture)
     
-    highestLabel.text = NSString(format: "%.1f", photoInfo?.highest ?? 0) as String
-    pulseLabel.text = NSString(format: "%.1f", photoInfo?.pulse ?? 0) as String
+    highestLabel.text = String(format: "%.1f", photoInfo?.highest ?? 0)
+    pulseLabel.text = String(format: "%.1f", photoInfo?.pulse ?? 0)
     viewsLabel.text = "\(photoInfo?.views ?? 0)"
     cameraLabel.text = photoInfo?.camera
     focalLengthLabel.text = photoInfo?.focalLength
@@ -47,7 +46,7 @@ class PhotoDetailsViewController: UIViewController {
     descriptionLabel.text = photoInfo?.desc
   }
   
-  func dismiss() {
-    self.dismissViewControllerAnimated(true, completion: nil)
+  private dynamic func dismissController() {
+    dismiss(animated: true, completion: nil)
   }
 }

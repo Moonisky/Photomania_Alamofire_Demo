@@ -9,8 +9,8 @@
 import UIKit
 
 class PhotoCommentsViewController: UITableViewController {
-  var photoID: Int = 0
-  var comments: [Comment]?
+  var photoID = 0
+  var comments = [Comment]()
   
   // MARK: Life-Cycle
   
@@ -21,30 +21,30 @@ class PhotoCommentsViewController: UITableViewController {
     tableView.estimatedRowHeight = 50.0
     
     title = "Comments"
-    navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .Done, target: self, action: "dismiss")
+    navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(dismissController))
   }
   
-  func dismiss() {
-    dismissViewControllerAnimated(true, completion: nil)
+  private dynamic func dismissController() {
+    dismiss(animated: true, completion: nil)
   }
   
   // MARK: - TableView
   
-  override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return comments?.count ?? 0
+  override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    return comments.count
   }
   
-  override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCellWithIdentifier("CommentCell", forIndexPath: indexPath) as! PhotoCommentTableViewCell
+  override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    guard let cell = tableView.dequeueReusableCell(withIdentifier: "CommentCell", for: indexPath) as? PhotoCommentTableViewCell else { return UITableViewCell() }
     
     return cell
   }
 }
 
-class PhotoCommentTableViewCell: UITableViewCell {
-  @IBOutlet weak var userImageView: UIImageView!
-  @IBOutlet weak var commentLabel: UILabel!
-  @IBOutlet weak var userFullnameLabel: UILabel!
+fileprivate class PhotoCommentTableViewCell: UITableViewCell {
+  @IBOutlet fileprivate weak var userImageView: UIImageView!
+  @IBOutlet fileprivate weak var commentLabel: UILabel!
+  @IBOutlet fileprivate weak var userFullnameLabel: UILabel!
   
   override func awakeFromNib() {
     super.awakeFromNib()

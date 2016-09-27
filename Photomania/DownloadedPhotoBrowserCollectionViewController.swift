@@ -9,8 +9,8 @@
 import UIKit
 
 class DownloadedPhotoBrowserCollectionViewController: UICollectionViewController {
-  var downloadedPhotoURLs: [NSURL]?
-  let DownloadedPhotoBrowserCellIdentifier = "DownloadedPhotoBrowserCell"
+  var downloadedPhotoURLs = [URL]()
+  private let DownloadedPhotoBrowserCellIdentifier = "DownloadedPhotoBrowserCell"
   
   // MARK: Life-Cycle
   
@@ -20,52 +20,47 @@ class DownloadedPhotoBrowserCollectionViewController: UICollectionViewController
     navigationController?.setNavigationBarHidden(false, animated: true)
     
     let layout = UICollectionViewFlowLayout()
-    layout.itemSize = CGSize(width: view.bounds.size.width, height: 200.0)
+    layout.itemSize = CGSize(width: view.bounds.width, height: 200.0)
     
     guard let collectionView = collectionView else { return }
     collectionView.collectionViewLayout = layout
     
-    collectionView.registerClass(DownloadedPhotoBrowserCollectionViewCell.classForCoder(), forCellWithReuseIdentifier: DownloadedPhotoBrowserCellIdentifier)
+    collectionView.register(DownloadedPhotoBrowserCollectionViewCell.classForCoder(), forCellWithReuseIdentifier: DownloadedPhotoBrowserCellIdentifier)
     
     let titleLabel = UILabel(frame: CGRect(x: 0.0, y: 0.0, width: 60.0, height: 30.0))
     titleLabel.text = "Photomania"
-    titleLabel.textColor = UIColor.whiteColor()
-    titleLabel.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
+    titleLabel.textColor = .white
+    titleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
     navigationItem.titleView = titleLabel
   }
   
-  override func viewDidAppear(animated: Bool) {
+  override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     
-    let directoryURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)[0]
-    var error: NSError?
+    let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     
-    let urls: [AnyObject]?
     do {
-        urls = try NSFileManager.defaultManager().contentsOfDirectoryAtURL(directoryURL, includingPropertiesForKeys: nil, options: [])
-    } catch let error1 as NSError {
-        error = error1
-        urls = nil
-    }
-    
-    if error == nil {
-        downloadedPhotoURLs = urls as? [NSURL]
-        collectionView!.reloadData()
+      let urls = try FileManager.default.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil, options: [])
+      
+      downloadedPhotoURLs = urls
+      collectionView?.reloadData()
+    } catch let error as NSError {
+      print(error)
     }
   }
   
   // MARK: CollectionView
   
-  override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-    return downloadedPhotoURLs?.count ?? 0
+  override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    return downloadedPhotoURLs.count
   }
   
-  override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-    let cell = collectionView.dequeueReusableCellWithReuseIdentifier(DownloadedPhotoBrowserCellIdentifier, forIndexPath: indexPath) as! DownloadedPhotoBrowserCollectionViewCell
+  override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DownloadedPhotoBrowserCellIdentifier, for: indexPath) as? DownloadedPhotoBrowserCollectionViewCell,
+      let localFileData = FileManager.default.contents(atPath: downloadedPhotoURLs[indexPath.item].path)
+      else { return UICollectionViewCell() }
     
-    let localFileData = NSFileManager.defaultManager().contentsAtPath(downloadedPhotoURLs![indexPath.item].path!)
-    
-    let image = UIImage(data: localFileData!, scale: UIScreen.mainScreen().scale)
+    let image = UIImage(data: localFileData, scale: UIScreen.main.scale)
     
     cell.imageView.image = image
     
@@ -73,8 +68,8 @@ class DownloadedPhotoBrowserCollectionViewController: UICollectionViewController
   }
 }
 
-class DownloadedPhotoBrowserCollectionViewCell: UICollectionViewCell {
-  let imageView = UIImageView()
+fileprivate class DownloadedPhotoBrowserCollectionViewCell: UICollectionViewCell {
+  fileprivate let imageView = UIImageView()
   
   required init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
@@ -85,6 +80,6 @@ class DownloadedPhotoBrowserCollectionViewCell: UICollectionViewCell {
     
     addSubview(imageView)
     imageView.frame = bounds
-    imageView.contentMode = .ScaleAspectFit
+    imageView.contentMode = .scaleAspectFit
   }
 }

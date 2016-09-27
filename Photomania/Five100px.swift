@@ -10,54 +10,54 @@ import UIKit
 
 struct Five100px {
   enum ImageSize: Int {
-    case Tiny = 1
-    case Small = 2
-    case Medium = 3
-    case Large = 4
-    case XLarge = 5
+    case tiny = 1
+    case small = 2
+    case medium = 3
+    case large = 4
+    case xLarge = 5
   }
   
   enum Category: Int, CustomStringConvertible {
-    case Uncategorized = 0, Celebrities, Film, Journalism, Nude, BlackAndWhite, StillLife, People, Landscapes, CityAndArchitecture, Abstract, Animals, Macro, Travel, Fashion, Commercial, Concert, Sport, Nature, PerformingArts, Family, Street, Underwater, Food, FineArt, Wedding, Transportation, UrbanExploration
+    case uncategorized = 0, celebrities, film, journalism, nude, blackAndWhite, stillLife, people, landscapes, cityAndArchitecture, abstract, animals, macro, travel, fashion, commercial, concert, sport, nature, performingArts, family, street, underwater, food, fineArt, wedding, transportation, urbanExploration
     
     var description: String {
       get {
         switch self {
-        case .Uncategorized: return "Uncategorized"
-        case .Celebrities: return "Celebrities"
-        case .Film: return "Film"
-        case .Journalism: return "Journalism"
-        case .Nude: return "Nude"
-        case .BlackAndWhite: return "Black And White"
-        case .StillLife: return "Still Life"
-        case .People: return "People"
-        case .Landscapes: return "Landscapes"
-        case .CityAndArchitecture: return "City And Architecture"
-        case .Abstract: return "Abstract"
-        case .Animals: return "Animals"
-        case .Macro: return "Macro"
-        case .Travel: return "Travel"
-        case .Fashion: return "Fashion"
-        case .Commercial: return "Commercial"
-        case .Concert: return "Concert"
-        case .Sport: return "Sport"
-        case .Nature: return "Nature"
-        case .PerformingArts: return "Performing Arts"
-        case .Family: return "Family"
-        case .Street: return "Street"
-        case .Underwater: return "Underwater"
-        case .Food: return "Food"
-        case .FineArt: return "Fine Art"
-        case .Wedding: return "Wedding"
-        case .Transportation: return "Transportation"
-        case .UrbanExploration: return "Urban Exploration"
+        case .uncategorized: return "Uncategorized"
+        case .celebrities: return "Celebrities"
+        case .film: return "Film"
+        case .journalism: return "Journalism"
+        case .nude: return "Nude"
+        case .blackAndWhite: return "Black And White"
+        case .stillLife: return "Still Life"
+        case .people: return "People"
+        case .landscapes: return "Landscapes"
+        case .cityAndArchitecture: return "City And Architecture"
+        case .abstract: return "Abstract"
+        case .animals: return "Animals"
+        case .macro: return "Macro"
+        case .travel: return "Travel"
+        case .fashion: return "Fashion"
+        case .commercial: return "Commercial"
+        case .concert: return "Concert"
+        case .sport: return "Sport"
+        case .nature: return "Nature"
+        case .performingArts: return "Performing Arts"
+        case .family: return "Family"
+        case .street: return "Street"
+        case .underwater: return "Underwater"
+        case .food: return "Food"
+        case .fineArt: return "Fine Art"
+        case .wedding: return "Wedding"
+        case .transportation: return "Transportation"
+        case .urbanExploration: return "Urban Exploration"
         }
       }
     }
   }
 }
 
-class PhotoInfo: NSObject {
+struct PhotoInfo {
   let id: Int
   let url: String
   
@@ -89,48 +89,57 @@ class PhotoInfo: NSObject {
     self.url = url
   }
   
-  required init(response: NSHTTPURLResponse, representation: AnyObject) {
-    self.id = representation.valueForKeyPath("photo.id") as! Int
-    self.url = representation.valueForKeyPath("photo.image_url") as! String
+  init?(response: HTTPURLResponse, representation: AnyObject) {
+    guard let photoID = representation.value(forKeyPath: "photo.id") as? Int,
+      let photoURL = representation.value(forKeyPath: "photo.image_url") as? String else { return nil }
+    id = photoID
+    url = photoURL
     
-    self.favoritesCount = representation.valueForKeyPath("photo.favorites_count") as? Int
-    self.votesCount = representation.valueForKeyPath("photo.votes_count") as? Int
-    self.commentsCount = representation.valueForKeyPath("photo.comments_count") as? Int
-    self.highest = representation.valueForKeyPath("photo.highest_rating") as? Float
-    self.pulse = representation.valueForKeyPath("photo.rating") as? Float
-    self.views = representation.valueForKeyPath("photo.times_viewed") as? Int
-    self.camera = representation.valueForKeyPath("photo.camera") as? String
-    self.focalLength = representation.valueForKeyPath("photo.focal_length") as? String
-    self.shutterSpeed = representation.valueForKeyPath("photo.shutter_speed") as? String
-    self.aperture = representation.valueForKeyPath("photo.aperture") as? String
-    self.iso = representation.valueForKeyPath("photo.iso") as? String
-    self.taken = representation.valueForKeyPath("photo.taken_at") as? String
-    self.uploaded = representation.valueForKeyPath("photo.created_at") as? String
-    self.desc = representation.valueForKeyPath("photo.description") as? String
-    self.name = representation.valueForKeyPath("photo.name") as? String
+    favoritesCount = representation.value(forKeyPath: "photo.favorites_count") as? Int
+    votesCount = representation.value(forKeyPath: "photo.votes_count") as? Int
+    commentsCount = representation.value(forKeyPath: "photo.comments_count") as? Int
+    highest = representation.value(forKeyPath: "photo.highest_rating") as? Float
+    pulse = representation.value(forKeyPath: "photo.rating") as? Float
+    views = representation.value(forKeyPath: "photo.times_viewed") as? Int
+    camera = representation.value(forKeyPath: "photo.camera") as? String
+    focalLength = representation.value(forKeyPath: "photo.focal_length") as? String
+    shutterSpeed = representation.value(forKeyPath: "photo.shutter_speed") as? String
+    aperture = representation.value(forKeyPath: "photo.aperture") as? String
+    iso = representation.value(forKeyPath: "photo.iso") as? String
+    taken = representation.value(forKeyPath: "photo.taken_at") as? String
+    uploaded = representation.value(forKeyPath: "photo.created_at") as? String
+    desc = representation.value(forKeyPath: "photo.description") as? String
+    name = representation.value(forKeyPath: "photo.name") as? String
     
-    self.username = representation.valueForKeyPath("photo.user.username") as? String
-    self.fullname = representation.valueForKeyPath("photo.user.fullname") as? String
-    self.userPictureURL = representation.valueForKeyPath("photo.user.userpic_url") as? String
-  }
-  
-  override func isEqual(object: AnyObject!) -> Bool {
-    return (object as! PhotoInfo).id == self.id
-  }
-  
-  override var hash: Int {
-    return (self as PhotoInfo).id
+    username = representation.value(forKeyPath: "photo.user.username") as? String
+    fullname = representation.value(forKeyPath: "photo.user.fullname") as? String
+    userPictureURL = representation.value(forKeyPath: "photo.user.userpic_url") as? String
   }
 }
 
-class Comment {
+extension PhotoInfo: Equatable {
+  static func ==(lhs: PhotoInfo, rhs: PhotoInfo) -> Bool {
+    return lhs.id == rhs.id
+  }
+}
+
+extension PhotoInfo: Hashable {
+  var hashValue: Int {
+    return id
+  }
+}
+
+struct Comment {
   let userFullname: String
   let userPictureURL: String
   let commentBody: String
   
-  init(JSON: AnyObject) {
-    userFullname = JSON.valueForKeyPath("user.fullname") as! String
-    userPictureURL = JSON.valueForKeyPath("user.userpic_url") as! String
-    commentBody = JSON.valueForKeyPath("body") as! String
+  init?(JSON: AnyObject) {
+    guard let fullname = JSON.value(forKeyPath: "user.fullname") as? String,
+      let pictureURL = JSON.value(forKeyPath: "user.userpic_url") as? String,
+      let body = JSON.value(forKeyPath: "body") as? String else { return nil }
+    userFullname = fullname
+    userPictureURL = pictureURL
+    commentBody = body
   }
 }
