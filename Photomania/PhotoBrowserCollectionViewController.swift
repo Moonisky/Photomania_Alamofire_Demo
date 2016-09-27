@@ -13,6 +13,7 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
   
   var photos = Set<PhotoInfo>()
   
+  private let imageCache = NSCache<NSString, UIImage>()
   private let refreshControl = UIRefreshControl()
   private var populatingPhotos = false
   private var currentPage = 1
@@ -44,13 +45,20 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
     guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PhotoBrowserCellIdentifier, for: indexPath) as? PhotoBrowserCollectionViewCell else { return UICollectionViewCell() }
     
     let imageURL = photos[photos.index(photos.startIndex, offsetBy: indexPath.item)].url
-    cell.imageView.image = nil
+
     cell.request?.cancel()
     
-    cell.request = Alamofire.request(imageURL, method: .get).responseImage {
-      response in
-      guard let image = response.result.value, response.result.error == nil else { return }
+    if let image = imageCache.object(forKey: imageURL as NSString) {
       cell.imageView.image = image
+    } else {
+      cell.imageView.image = nil
+      
+      cell.request = Alamofire.request(imageURL, method: .get).responseImage {
+        response in
+        guard let image = response.result.value, response.result.error == nil else { return }
+        self.imageCache.setObject(image, forKey: response.request!.url!.absoluteString as NSString)
+        cell.imageView.image = image
+      }
     }
     
     return cell
@@ -146,7 +154,16 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
   }
   
   private dynamic func handleRefresh() {
+    refreshControl.beginRefreshing()
     
+    photos.removeAll()
+    currentPage = 1
+    
+    collectionView?.reloadData()
+    
+    refreshControl.endRefreshing()
+    
+    populatePhotos()
   }
 }
 

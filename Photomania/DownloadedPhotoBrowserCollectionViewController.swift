@@ -68,7 +68,7 @@ class DownloadedPhotoBrowserCollectionViewController: UICollectionViewController
   }
 }
 
-fileprivate class DownloadedPhotoBrowserCollectionViewCell: UICollectionViewCell {
+class DownloadedPhotoBrowserCollectionViewCell: UICollectionViewCell {
   fileprivate let imageView = UIImageView()
   
   required init?(coder aDecoder: NSCoder) {

@@ -12,7 +12,38 @@ import Alamofire
 enum BackendError: Error {
   case network(error: Error)
   case dataSerialization(error: Error)
+  case jsonSerialization(error: Error)
+  case objectSerialization(error: String)
   case imageSerialization(error: String)
+}
+
+protocol ResponseObjectSerializable {
+  init?(response: HTTPURLResponse, representation: Any)
+}
+
+extension DataRequest {
+  @discardableResult
+  func responseObject<T: ResponseObjectSerializable>(queue: DispatchQueue? = nil, completionHandler: @escaping (DataResponse<T>) -> Void) -> Self {
+    let responseSerializer = DataResponseSerializer<T> { request, response, data, error in
+      guard error == nil else { return .failure(BackendError.network(error: error!)) }
+      
+      let jsonResponseSerializer = DataRequest.jsonResponseSerializer(options: .allowFragments)
+      let result = jsonResponseSerializer.serializeResponse(request, response, data, nil)
+      
+      guard case let .success(jsonObject) = result else {
+        return .failure(BackendError.jsonSerialization(error: result.error!))
+      }
+      
+      guard let response = response, let responseObject = T(response: response, representation: jsonObject) else {
+        let reason = "Response object could not be serialized due to nil response."
+        return .failure(BackendError.objectSerialization(error: reason))
+      }
+      
+      return .success(responseObject)
+    }
+    
+    return response(queue: queue, responseSerializer: responseSerializer, completionHandler: completionHandler)
+  }
 }
 
 extension DataRequest {
@@ -37,6 +68,36 @@ extension DataRequest {
   @discardableResult
   func responseImage(queue: DispatchQueue? = nil, completionHandler: @escaping (DataResponse<UIImage>) -> Void) -> Self {
     return response(queue: queue, responseSerializer: DataRequest.imageResponseSerializer(), completionHandler: completionHandler)
+  }
+}
+
+protocol ResponseCollectionSerializable {
+  static func collection(from response: HTTPURLResponse, withRepresentation representation: Any) -> [Self]
+}
+
+extension DataRequest {
+  @discardableResult
+  func responseCollection<T: ResponseCollectionSerializable>(queue: DispatchQueue? = nil, completionHandler: @escaping (DataResponse<[T]>) -> Void) -> Self {
+    let responseSerializer = DataResponseSerializer<[T]> {
+      request, response, data, error in
+      guard error == nil else { return .failure(BackendError.network(error: error!)) }
+      
+      let jsonSerializer = DataRequest.jsonResponseSerializer(options: .allowFragments)
+      let result = jsonSerializer.serializeResponse(request, response, data, nil)
+      
+      guard case let .success(jsonObject) = result else {
+        return .failure(BackendError.jsonSerialization(error: result.error!))
+      }
+      
+      guard let response = response else {
+        let reason = "Response collection could not be serialized due to nil response."
+        return .failure(BackendError.objectSerialization(error: reason))
+      }
+      
+      return .success(T.collection(from: response, withRepresentation: jsonObject))
+    }
+    
+    return response(responseSerializer: responseSerializer, completionHandler: completionHandler)
   }
 }
 
@@ -152,7 +213,8 @@ struct PhotoInfo {
     self.url = url
   }
   
-  init?(response: HTTPURLResponse, representation: AnyObject) {
+  init?(response: HTTPURLResponse, representation: Any) {
+    let representation = representation as AnyObject
     guard let photoID = representation.value(forKeyPath: "photo.id") as? Int,
       let photoURL = representation.value(forKeyPath: "photo.image_url") as? String else { return nil }
     id = photoID
@@ -192,6 +254,8 @@ extension PhotoInfo: Hashable {
   }
 }
 
+extension PhotoInfo: ResponseObjectSerializable { }
+
 struct Comment {
   let userFullname: String
   let userPictureURL: String
@@ -204,5 +268,20 @@ struct Comment {
     userFullname = fullname
     userPictureURL = pictureURL
     commentBody = body
+  }
+}
+
+extension Comment: ResponseCollectionSerializable {
+  static func collection(from response: HTTPURLResponse, withRepresentation representation: Any) -> [Comment] {
+    var comments = [Comment]()
+    
+    guard let represences = (representation as AnyObject).value(forKey: "comments") as? [[String: Any]] else { return comments }
+    represences.forEach {
+      if let comment = Comment(JSON: $0 as AnyObject) {
+        comments.append(comment)
+      }
+    }
+    
+    return comments
   }
 }

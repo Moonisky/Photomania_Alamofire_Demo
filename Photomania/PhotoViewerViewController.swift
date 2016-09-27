@@ -8,6 +8,7 @@
 
 import UIKit
 import QuartzCore
+import Alamofire
 
 fileprivate func < <T: Comparable>(lhs: T?, rhs: T?) -> Bool {
   switch (lhs, rhs) {
@@ -45,6 +46,8 @@ class PhotoViewerViewController: UIViewController {
     super.viewDidLoad()
     
     setupView()
+    
+    loadPhoto()
   }
   
   func setupView() {
@@ -169,6 +172,32 @@ class PhotoViewerViewController: UIViewController {
     return barButton
   }
   
+  private func loadPhoto() {
+    Alamofire.request(Five100px.Router.photoInfo(photoID, .large)).validate().responseObject {
+      (response: DataResponse<PhotoInfo>) in
+      
+      guard let info = response.result.value else { return }
+      
+      self.photoInfo = info
+      
+      DispatchQueue.main.async {
+        self.addButtomBar()
+        self.title = info.url
+      }
+      
+      Alamofire.request(info.url, method: .get).validate().responseImage {
+        response in
+        guard let image = response.result.value else { return }
+        
+        self.imageView.image = image
+        self.imageView.frame = self.centerFrameFromImage(image)
+        
+        self.spinner.stopAnimating()
+        self.centerScrollViewContents()
+      }
+    }
+  }
+  
   // MARK: Download Photo
   
   private dynamic func showActions() {
@@ -182,8 +211,34 @@ class PhotoViewerViewController: UIViewController {
   }
   
   fileprivate func downloadPhoto() {
+    Alamofire.request(Five100px.Router.photoInfo(photoInfo!.id, .xLarge)).validate().responseJSON {
+      response in
+      guard let jsonDictionary = response.result.value as? [String: Any],
+        let imageURL = (jsonDictionary as AnyObject).value(forKeyPath: "photo.image_url") as? String else { return }
+      
+      let destination: DownloadRequest.DownloadFileDestination = { _, response in
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let fileURL = documentsURL.appendingPathComponent("\(self.photoInfo!.id).\(response.suggestedFilename)")
+        
+        return (fileURL, [.removePreviousFile, .createIntermediateDirectories])
+      }
+      
+      let progressIndicatorView = UIProgressView(frame: CGRect(x: 0.0, y: 80.0, width: self.view.bounds.width, height: 10.0))
+      progressIndicatorView.tintColor = .blue
+      self.view.addSubview(progressIndicatorView)
+      
+      let _ = Alamofire.download(imageURL, to: destination).downloadProgress { progress in
+        DispatchQueue.main.async {
+          progressIndicatorView.setProgress(Float(progress.fractionCompleted), animated: true)
+          
+          if progress.fractionCompleted == 1 {
+            progressIndicatorView.removeFromSuperview()
+          }
+        }
+      }
+    }
   }
-  
+
   // MARK: Gesture Recognizers
   
   private dynamic func handleDoubleTap(_ recognizer: UITapGestureRecognizer!) {
@@ -221,7 +276,7 @@ class PhotoViewerViewController: UIViewController {
 
 extension PhotoViewerViewController: UIScrollViewDelegate {
   
-  private func centerFrameFromImage(_ image: UIImage?) -> CGRect {
+  fileprivate func centerFrameFromImage(_ image: UIImage?) -> CGRect {
     
     guard let image = image else { return CGRect() }
     
@@ -241,7 +296,7 @@ extension PhotoViewerViewController: UIScrollViewDelegate {
     centerScrollViewContents()
   }
   
-  private func centerScrollViewContents() {
+  fileprivate func centerScrollViewContents() {
     let boundsSize = scrollView.frame
     var contentsFrame = imageView.frame
     
