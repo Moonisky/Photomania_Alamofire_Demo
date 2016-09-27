@@ -221,7 +221,7 @@ class PhotoViewerViewController: UIViewController {
 
 extension PhotoViewerViewController: UIScrollViewDelegate {
   
-  private func centerFrameFromImage(_ image: UIImage?) -> CGRect {
+  fileprivate func centerFrameFromImage(_ image: UIImage?) -> CGRect {
     
     guard let image = image else { return CGRect() }
     
@@ -241,7 +241,7 @@ extension PhotoViewerViewController: UIScrollViewDelegate {
     centerScrollViewContents()
   }
   
-  private func centerScrollViewContents() {
+  fileprivate func centerScrollViewContents() {
     let boundsSize = scrollView.frame
     var contentsFrame = imageView.frame
     

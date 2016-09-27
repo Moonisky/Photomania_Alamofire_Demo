@@ -90,7 +90,7 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
   }
 }
 
-fileprivate class PhotoBrowserCollectionViewCell: UICollectionViewCell {
+class PhotoBrowserCollectionViewCell: UICollectionViewCell {
   fileprivate let imageView = UIImageView()
   
   required init?(coder aDecoder: NSCoder) {
@@ -107,7 +107,7 @@ fileprivate class PhotoBrowserCollectionViewCell: UICollectionViewCell {
   }
 }
 
-fileprivate class PhotoBrowserCollectionViewLoadingCell: UICollectionReusableView {
+class PhotoBrowserCollectionViewLoadingCell: UICollectionReusableView {
   fileprivate let spinner = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
   
   required init?(coder aDecoder: NSCoder) {

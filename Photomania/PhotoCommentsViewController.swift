@@ -41,7 +41,7 @@ class PhotoCommentsViewController: UITableViewController {
   }
 }
 
-fileprivate class PhotoCommentTableViewCell: UITableViewCell {
+class PhotoCommentTableViewCell: UITableViewCell {
   @IBOutlet fileprivate weak var userImageView: UIImageView!
   @IBOutlet fileprivate weak var commentLabel: UILabel!
   @IBOutlet fileprivate weak var userFullnameLabel: UILabel!
